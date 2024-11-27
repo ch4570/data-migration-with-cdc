@@ -7,6 +7,4 @@ data class RegisterMessageServiceRequest(
     val content: String,
     val roomId: Long,
     val files: List<FileCommand>,
-) {
-    fun hasFiles() = files.isNotEmpty()
-}
+)
