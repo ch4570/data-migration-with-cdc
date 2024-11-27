@@ -11,9 +11,6 @@ import com.example.demo.repository.TextMessageEventRepository
 import com.example.demo.service.usecase.RegisterMessageEventUseCase
 import com.example.demo.util.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,31 +26,36 @@ class RegisterMessageEventService(
             return
         }
 
-        val textMessageEvent = TextMessageEvent(
-            messageId = messageEvent.id,
-            senderId = messageEvent.senderId,
-            content = messageEvent.content,
-            roomId = messageEvent.roomId,
-            operationType = messageEvent.operationType,
-            eventStatus = EventStatus.CREATED,
-        )
+        try {
+            mongoTemplate.markIsComplete(messageEvent.id, MessageEvent::class.java)
 
-        textMessageEventRepository.save(textMessageEvent)
+            val textMessageEvent = TextMessageEvent(
+                messageId = messageEvent.id,
+                senderId = messageEvent.senderId,
+                content = messageEvent.content,
+                roomId = messageEvent.roomId,
+                operationType = messageEvent.operationType,
+                eventStatus = EventStatus.CREATED,
+            )
 
-        if (messageEvent.hasFiles()) {
-            val attachments = messageEvent.attachments.map {
-                FileEvent(
-                    fileId = it.fileId,
-                    fileName = it.fileName,
-                    extension = it.extension,
-                    operationType = it.operationType,
-                    eventStatus = EventStatus.CREATED,
-                )
+            textMessageEventRepository.save(textMessageEvent)
+
+            if (messageEvent.hasFiles()) {
+                val attachments = messageEvent.attachments.map {
+                    FileEvent(
+                        fileId = it.fileId,
+                        fileName = it.fileName,
+                        extension = it.extension,
+                        operationType = it.operationType,
+                        eventStatus = EventStatus.CREATED,
+                    )
+                }
+
+                fileEventRepository.saveAll(attachments)
             }
-
-            fileEventRepository.saveAll(attachments)
+        } catch (e: Exception) {
+            // rollback
+            throw e
         }
-
-        mongoTemplate.markIsComplete(messageEvent.id, MessageEvent::class.java)
     }
 }

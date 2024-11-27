@@ -20,8 +20,14 @@ class RegisterTextMessageService(
             return
         }
 
-        mongoTemplate.markIsComplete(textMessage.id, TextMessageEvent::class.java)
-        // ES SEND
+        try {
+            mongoTemplate.markIsComplete(textMessage.id, TextMessageEvent::class.java)
+            // ES SEND
+
+        } catch (e: Exception) {
+            // rollback logic
+        }
+
 
     }
 

@@ -4,6 +4,7 @@ import com.example.demo.entity.OperationType
 import java.time.LocalDateTime
 
 data class FileEventPayload(
+    val id: String,
     val fileId: String,
     val fileName: String,
     val extension: String,
