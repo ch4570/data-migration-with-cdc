@@ -1,1 +1,11 @@
-spring.application.name=demo
+spring:
+  application:
+    name: demo
+  data:
+    mongodb:
+      uri: mongodb://root:root@127.0.0.1:27017,127.0.0.1:27018,127.0.0.1:27019/message-event-db?replicaSet=myReplicaSet&authSource=admin
+
+
+logging:
+  level:
+    org.springframework.transaction.interceptor: TRACE

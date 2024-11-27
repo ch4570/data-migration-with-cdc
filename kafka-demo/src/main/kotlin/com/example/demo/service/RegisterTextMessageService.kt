@@ -8,8 +8,10 @@ import com.example.demo.service.usecase.RegisterTextMessageUseCase
 import com.example.demo.util.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class RegisterTextMessageService(
     private val mongoTemplate: MongoTemplate,
     private val textMessageEventRepository: TextMessageEventRepository,

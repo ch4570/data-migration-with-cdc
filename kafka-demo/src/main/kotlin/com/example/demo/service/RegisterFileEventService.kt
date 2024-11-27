@@ -8,8 +8,10 @@ import com.example.demo.service.usecase.RegisterFileEventUseCase
 import com.example.demo.util.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class RegisterFileEventService(
     private val mongoTemplate: MongoTemplate,
     private val fileEventRepository: FileEventRepository,

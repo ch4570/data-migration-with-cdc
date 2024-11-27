@@ -12,13 +12,15 @@ import com.example.demo.service.usecase.RegisterMessageEventUseCase
 import com.example.demo.util.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class RegisterMessageEventService(
+    private val mongoTemplate: MongoTemplate,
     private val fileEventRepository: FileEventRepository,
     private val messageEventRepository: MessageEventRepository,
     private val textMessageEventRepository: TextMessageEventRepository,
-    private val mongoTemplate: MongoTemplate,
 ) : RegisterMessageEventUseCase {
 
     override fun registerMessageEvent(messageEvent: MessageEventPayload) {
