@@ -5,7 +5,7 @@ import com.example.demo.entity.FileEvent
 import com.example.demo.event.dto.FileEventPayload
 import com.example.demo.repository.FileEventRepository
 import com.example.demo.service.usecase.RegisterFileEventUseCase
-import com.example.demo.util.markIsComplete
+import com.example.demo.utils.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

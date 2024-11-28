@@ -3,6 +3,7 @@ package com.example.demo.config
 import com.example.demo.event.dto.MessageEventPayload
 import com.example.demo.event.dto.SingleFileEventPayload
 import com.example.demo.event.dto.TextMessageEventPayload
+import com.example.demo.utils.MessageEventPayloadDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.context.annotation.Bean
@@ -12,11 +13,14 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 
 @EnableKafka
 @Configuration(proxyBeanMethods = false)
-class KafkaConsumerConfig {
+class KafkaConsumerConfig(
+    val messageEventPayloadDeserializer: MessageEventPayloadDeserializer,
+) {
 
     @Bean(name = ["message-event-consumer"])
     fun messageEventConsumer() : ConcurrentKafkaListenerContainerFactory<String, MessageEventPayload> {
@@ -27,7 +31,7 @@ class KafkaConsumerConfig {
     }
 
     private fun messageEventConsumerFactory() : ConsumerFactory<String, MessageEventPayload> {
-        val deserializer = JsonDeserializer(MessageEventPayload::class.java, false)
+        val deserializer = ErrorHandlingDeserializer(messageEventPayloadDeserializer)
 
         return DefaultKafkaConsumerFactory(createConsumerConfigs(), StringDeserializer(), deserializer)
     }
@@ -64,9 +68,9 @@ class KafkaConsumerConfig {
 
     private fun createConsumerConfigs() = mapOf(
         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
-        ConsumerConfig.GROUP_ID_CONFIG to "group-example-1",
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class::java,
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
+        ConsumerConfig.GROUP_ID_CONFIG to "group1",
         JsonDeserializer.TRUSTED_PACKAGES to "*",
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",

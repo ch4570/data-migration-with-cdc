@@ -1,17 +1,29 @@
 package com.example.demo.event.dto
 
+import com.example.demo.entity.EventStatus
 import com.example.demo.entity.OperationType
-import java.time.LocalDateTime
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class MessageEventPayload(
-    val id: String,
-    val senderId: Long,
+    @JsonProperty("_id")
+    val id: IdWrapper,
+    val senderId: LongTypeWrapper,
     val content: String,
-    val roomId: Long,
+    val roomId: LongTypeWrapper,
     val operationType: OperationType,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
-    val attachments: List<FileEventPayload>
+    val eventStatus: EventStatus,
+    val createdAt: LocalDateTimeWrapper,
+    val updatedAt: LocalDateTimeWrapper,
+    val attachments: List<Attachment>,
 ) {
     fun hasFiles() = attachments.isNotEmpty()
 }
+
+class Attachment(
+    val fileId: String,
+    val fileName: String,
+    val extension: String,
+    val operationType: OperationType,
+    val createdAt: LocalDateTimeWrapper,
+    val updatedAt: LocalDateTimeWrapper,
+)

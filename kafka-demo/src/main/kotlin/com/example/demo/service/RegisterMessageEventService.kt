@@ -9,7 +9,7 @@ import com.example.demo.repository.FileEventRepository
 import com.example.demo.repository.MessageEventRepository
 import com.example.demo.repository.TextMessageEventRepository
 import com.example.demo.service.usecase.RegisterMessageEventUseCase
-import com.example.demo.util.markIsComplete
+import com.example.demo.utils.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,18 +24,18 @@ class RegisterMessageEventService(
 ) : RegisterMessageEventUseCase {
 
     override fun registerMessageEvent(messageEvent: MessageEventPayload) {
-        if (messageEventRepository.existsByIdAndEventStatus(messageEvent.id, EventStatus.COMPLETE)) {
+        if (messageEventRepository.existsByIdAndEventStatus(messageEvent.id.value, EventStatus.COMPLETE)) {
             return
         }
 
         try {
-            mongoTemplate.markIsComplete(messageEvent.id, MessageEvent::class.java)
+            mongoTemplate.markIsComplete(messageEvent.id.value, MessageEvent::class.java)
 
             val textMessageEvent = TextMessageEvent(
-                messageId = messageEvent.id,
-                senderId = messageEvent.senderId,
+                messageId = messageEvent.id.value,
+                senderId = messageEvent.senderId.value,
                 content = messageEvent.content,
-                roomId = messageEvent.roomId,
+                roomId = messageEvent.roomId.value,
                 operationType = messageEvent.operationType,
                 eventStatus = EventStatus.CREATED,
             )

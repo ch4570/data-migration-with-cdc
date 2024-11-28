@@ -13,6 +13,8 @@ services:
     volumes:
       - ./data:/data/db
       - ./mongodb.key:/etc/mongodb.key
+    networks:
+     - cdc_default
     command: 'mongod --replSet myReplicaSet --keyFile /etc/mongodb.key --bind_ip_all --port 27017'
   mongo2:
     image: mongo:latest
@@ -29,6 +31,8 @@ services:
     volumes:
       - ./data2:/data/db
       - ./mongodb.key:/etc/mongodb.key
+    networks:
+     - cdc_default
     command: 'mongod --replSet myReplicaSet --keyFile /etc/mongodb.key --bind_ip_all --port 27018'
   mongo3:
     image: mongo:latest
@@ -45,4 +49,10 @@ services:
     volumes:
       - ./data3:/data/db
       - ./mongodb.key:/etc/mongodb.key
+    networks:
+     - cdc_default
     command: 'mongod --replSet myReplicaSet --keyFile /etc/mongodb.key --bind_ip_all --port 27019'
+
+networks:
+  cdc_default:
+    external: true

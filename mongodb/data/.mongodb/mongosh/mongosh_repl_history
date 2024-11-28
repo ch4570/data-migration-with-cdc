@@ -1,0 +1,37 @@
+exit
+rs.status()
+exit
+db["message-event"].find()
+db["message-event"].deleteMany({})
+db["message-event"].deleteMany({}_
+db["message-event"].find()
+db["file-event"].find()
+db["file-event"].deleteMany({})
+db["file-event"].deleteMany()
+db["file-event"].find()
+db.message.deleteMany({})
+db.file.deleteMany({})
+db.file.find()
+db.`file-event`.find()
+db.file-event.find()
+db.message.find()
+db.file-event.find()
+db.message.find()
+db.message.insert({name: "rex", role: "Developer"})
+use message-event-db
+db.getUser("rex")
+db.grantRolesToUser("rex", [{role : "readWrite", db: "message-event-db"}])
+db.getUser("rex")
+use message-event-db
+exit
+rs.status()
+rs.initiate({ _id: "myReplicaSet", members: [ { _id: 0, host: "mongo1:27017" }, { _id: 1, host: "mongo2:27018" }, { _id: 2, host: "mongo3:27019" }] })
+rs.initiate({ _id: "myReplicaSet", members: [ { _id: 0, host: "mongodb1:27017" }, { _id: 1, host: "mongodb2:27018" }, { _id: 2, host: "mongodb3:27019" }] })
+exit
+rs.initiate({ _id: "myReplicaSet", members: [ { _id: 0, host: "mongodb1:27017" }, { _id: 1, host: "mongodb2:27018" }, { _id: 2, host: "mongodb3:27019" }] })
+rs.status()
+use admin
+usd admin
+use damin
+use adminn
+use adminin

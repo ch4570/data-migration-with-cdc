@@ -5,7 +5,7 @@ import com.example.demo.entity.TextMessageEvent
 import com.example.demo.event.dto.TextMessageEventPayload
 import com.example.demo.repository.TextMessageEventRepository
 import com.example.demo.service.usecase.RegisterTextMessageUseCase
-import com.example.demo.util.markIsComplete
+import com.example.demo.utils.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
