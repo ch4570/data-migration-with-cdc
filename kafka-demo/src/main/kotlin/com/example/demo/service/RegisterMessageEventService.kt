@@ -1,13 +1,13 @@
 package com.example.demo.service
 
 import com.example.demo.entity.EventStatus
-import com.example.demo.entity.FileEvent
-import com.example.demo.entity.MessageEvent
-import com.example.demo.entity.TextMessageEvent
+import com.example.demo.entity.mongo.FileEvent
+import com.example.demo.entity.mongo.MessageEvent
+import com.example.demo.entity.mongo.TextMessageEvent
 import com.example.demo.event.dto.MessageEventPayload
-import com.example.demo.repository.FileEventRepository
-import com.example.demo.repository.MessageEventRepository
-import com.example.demo.repository.TextMessageEventRepository
+import com.example.demo.repository.mongo.FileEventRepository
+import com.example.demo.repository.mongo.MessageEventRepository
+import com.example.demo.repository.mongo.TextMessageEventRepository
 import com.example.demo.service.usecase.RegisterMessageEventUseCase
 import com.example.demo.utils.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate

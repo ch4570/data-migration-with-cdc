@@ -1,9 +1,12 @@
 package com.example.demo.service
 
 import com.example.demo.entity.EventStatus
-import com.example.demo.entity.FileEvent
+import com.example.demo.entity.elastic.SingleFileElastic
+import com.example.demo.entity.mongo.FileEvent
 import com.example.demo.event.dto.FileEventPayload
-import com.example.demo.repository.FileEventRepository
+import com.example.demo.event.dto.SingleFileEventPayload
+import com.example.demo.repository.elastic.SingleFileElasticRepository
+import com.example.demo.repository.mongo.FileEventRepository
 import com.example.demo.service.usecase.RegisterFileEventUseCase
 import com.example.demo.utils.markIsComplete
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -15,18 +18,30 @@ import org.springframework.transaction.annotation.Transactional
 class RegisterFileEventService(
     private val mongoTemplate: MongoTemplate,
     private val fileEventRepository: FileEventRepository,
+    private val fileElasticRepository: SingleFileElasticRepository,
 ) : RegisterFileEventUseCase {
 
-    override fun registerFileEvent(payload: FileEventPayload) {
-        if (fileEventRepository.existsByIdAndEventStatus(payload.id, EventStatus.COMPLETE)) {
+    override fun registerFileEvent(payload: SingleFileEventPayload) {
+        if (fileEventRepository.existsByIdAndEventStatus(payload.id.value, EventStatus.COMPLETE)) {
             return
         }
 
         try {
-            mongoTemplate.markIsComplete(payload.fileId, FileEvent::class.java)
+            mongoTemplate.markIsComplete(payload.id.value, FileEvent::class.java)
             // ES Send
+            val fileElastic = SingleFileElastic(
+                fileId = payload.fileId,
+                fileName = payload.fileName,
+                extension = payload.extension,
+                createdAt = payload.createdAt.value,
+                updatedAt = payload.updatedAt.value,
+            )
+
+            fileElasticRepository.save(fileElastic)
+
         } catch (e: Exception) {
             // rollback
+            throw e
         }
     }
 }

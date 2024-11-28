@@ -2,7 +2,6 @@ package com.example.demo.event.dto
 
 import com.example.demo.entity.OperationType
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.LocalDateTime
 
 data class SingleFileEventPayload(
     @JsonProperty("_id")

@@ -1,16 +1,19 @@
-package com.example.demo.entity
+package com.example.demo.entity.mongo
 
+import com.example.demo.entity.EventStatus
+import com.example.demo.entity.OperationType
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
-@Document("file-event")
-data class FileEvent(
+@Document("text-message-event")
+class TextMessageEvent(
     @Id
     val id: String? = null,
-    val fileId: String,
-    val fileName: String,
-    val extension: String,
+    val messageId: String,
+    val senderId: Long,
+    val content: String,
+    val roomId: Long,
     val operationType: OperationType,
     val eventStatus: EventStatus,
     val createdAt: LocalDateTime = LocalDateTime.now(),
