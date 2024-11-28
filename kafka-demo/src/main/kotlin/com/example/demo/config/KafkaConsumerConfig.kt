@@ -4,6 +4,8 @@ import com.example.demo.event.dto.MessageEventPayload
 import com.example.demo.event.dto.SingleFileEventPayload
 import com.example.demo.event.dto.TextMessageEventPayload
 import com.example.demo.utils.MessageEventPayloadDeserializer
+import com.example.demo.utils.SingleFileEventPayloadDeserializer
+import com.example.demo.utils.TextMessageEventPayloadDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.context.annotation.Bean
@@ -20,6 +22,8 @@ import org.springframework.kafka.support.serializer.JsonDeserializer
 @Configuration(proxyBeanMethods = false)
 class KafkaConsumerConfig(
     val messageEventPayloadDeserializer: MessageEventPayloadDeserializer,
+    val textMessageEventPayloadDeserializer: TextMessageEventPayloadDeserializer,
+    val singleFileEventPayloadDeserializer: SingleFileEventPayloadDeserializer,
 ) {
 
     @Bean(name = ["message-event-consumer"])
@@ -45,7 +49,7 @@ class KafkaConsumerConfig(
     }
 
     private fun textMessageEventConsumerFactory() : ConsumerFactory<String, TextMessageEventPayload> {
-        val deserializer = JsonDeserializer(TextMessageEventPayload::class.java, false)
+        val deserializer = ErrorHandlingDeserializer(textMessageEventPayloadDeserializer)
 
         return DefaultKafkaConsumerFactory(createConsumerConfigs(), StringDeserializer(), deserializer)
     }
@@ -59,7 +63,7 @@ class KafkaConsumerConfig(
     }
 
     private fun singleFileEventConsumerFactory() : ConsumerFactory<String, SingleFileEventPayload> {
-        val deserializer = JsonDeserializer(SingleFileEventPayload::class.java, false)
+        val deserializer = ErrorHandlingDeserializer(singleFileEventPayloadDeserializer)
 
         return DefaultKafkaConsumerFactory(createConsumerConfigs(), StringDeserializer(), deserializer)
     }

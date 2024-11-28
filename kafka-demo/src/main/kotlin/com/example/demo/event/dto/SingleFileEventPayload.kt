@@ -1,14 +1,16 @@
 package com.example.demo.event.dto
 
 import com.example.demo.entity.OperationType
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
 data class SingleFileEventPayload(
-    val id: String,
+    @JsonProperty("_id")
+    val id: IdWrapper,
     val fileId: String,
     val fileName: String,
     val extension: String,
     val operationType: OperationType,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
+    val createdAt: LocalDateTimeWrapper,
+    val updatedAt: LocalDateTimeWrapper,
 )

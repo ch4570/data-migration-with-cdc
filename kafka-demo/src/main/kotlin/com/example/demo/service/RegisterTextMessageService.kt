@@ -18,16 +18,17 @@ class RegisterTextMessageService(
 ) : RegisterTextMessageUseCase {
 
     override fun registerTextMessage(textMessage: TextMessageEventPayload) {
-        if (textMessageEventRepository.existsByIdAndEventStatus(textMessage.id, EventStatus.COMPLETE)) {
+        if (textMessageEventRepository.existsByIdAndEventStatus(textMessage.id.value, EventStatus.COMPLETE)) {
             return
         }
 
         try {
-            mongoTemplate.markIsComplete(textMessage.id, TextMessageEvent::class.java)
+            mongoTemplate.markIsComplete(textMessage.id.value, TextMessageEvent::class.java)
             // ES SEND
 
         } catch (e: Exception) {
             // rollback logic
+            throw e
         }
 
 

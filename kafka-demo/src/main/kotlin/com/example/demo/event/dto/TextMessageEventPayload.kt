@@ -2,16 +2,17 @@ package com.example.demo.event.dto
 
 import com.example.demo.entity.EventStatus
 import com.example.demo.entity.OperationType
-import java.time.LocalDateTime
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class TextMessageEventPayload(
-    val id: String,
+    @JsonProperty("_id")
+    val id: IdWrapper,
     val messageId: String,
-    val senderId: Long,
+    val senderId: LongTypeWrapper,
     val content: String,
-    val roomId: Long,
+    val roomId: LongTypeWrapper,
     val operationType: OperationType,
     val eventStatus: EventStatus,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
+    val createdAt: LocalDateTimeWrapper,
+    val updatedAt: LocalDateTimeWrapper,
 )

@@ -17,7 +17,7 @@ class MessageEventListener(
 
     private val logger = LoggerFactory.getLogger(MessageEventListener::class.java)
 
-    @KafkaListener(topics = ["message-event-db"], groupId = "group1", containerFactory = "message-event-consumer")
+    @KafkaListener(topics = ["message-event"], groupId = "group1", containerFactory = "message-event-consumer")
     fun handleEvent(record: ConsumerRecord<String, MessageEventPayload>, acknowledgment: Acknowledgment) {
         logger.info("메시지 수신 완료 = [${record.value()}], 수신 시각 = [${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}]")
 
