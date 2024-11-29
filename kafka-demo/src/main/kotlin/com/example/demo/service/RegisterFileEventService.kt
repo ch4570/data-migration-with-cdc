@@ -3,7 +3,6 @@ package com.example.demo.service
 import com.example.demo.entity.EventStatus
 import com.example.demo.entity.elastic.SingleFileElastic
 import com.example.demo.entity.mongo.FileEvent
-import com.example.demo.event.dto.FileEventPayload
 import com.example.demo.event.dto.SingleFileEventPayload
 import com.example.demo.repository.elastic.SingleFileElasticRepository
 import com.example.demo.repository.mongo.FileEventRepository

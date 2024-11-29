@@ -10,6 +10,10 @@ spring:
       bootstrap-servers: localhost:9092
       group-id: group1
 
+  threads:
+    virtual:
+      enabled: true
+
 logging:
   level:
     org.springframework.transaction.interceptor: TRACE
