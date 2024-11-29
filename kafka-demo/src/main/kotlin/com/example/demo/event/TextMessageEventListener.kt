@@ -22,6 +22,7 @@ class TextMessageEventListener(
     @KafkaListener(topics = ["text-message-event"], groupId = "consumer-group", containerFactory = "text-message-event-consumer")
     fun handleEvent(record: ConsumerRecord<String, TextMessageEventPayload>, acknowledgment: Acknowledgment) {
         logger.info("이벤트 수신 완료 = [${record.value()}], 수신 시각 = [${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}]")
+//        throw Exception()
         registerTextMessageUseCase.registerTextMessage(record.value())
         acknowledgment.acknowledge()
     }
