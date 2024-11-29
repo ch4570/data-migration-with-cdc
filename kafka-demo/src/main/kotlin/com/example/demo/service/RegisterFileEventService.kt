@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional
@@ -35,8 +36,8 @@ class RegisterFileEventService(
                 fileId = payload.fileId,
                 fileName = payload.fileName,
                 extension = payload.extension,
-                createdAt = payload.createdAt.value,
-                updatedAt = payload.updatedAt.value,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now(),
             )
 
             fileElasticRepository.save(fileElastic)

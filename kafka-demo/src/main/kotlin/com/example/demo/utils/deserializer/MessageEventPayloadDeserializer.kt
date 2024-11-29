@@ -1,4 +1,4 @@
-package com.example.demo.utils
+package com.example.demo.utils.deserializer
 
 import com.example.demo.event.dto.MessageEventPayload
 import com.fasterxml.jackson.databind.ObjectMapper

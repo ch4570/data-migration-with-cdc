@@ -1,7 +1,7 @@
 package com.example.demo.event.dto
 
-import com.example.demo.utils.LocalDateTimeDeserializer
-import com.example.demo.utils.LocalDateTimeSerializer
+import com.example.demo.utils.deserializer.LocalDateTimeDeserializer
+import com.example.demo.utils.serializer.LocalDateTimeSerializer
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize

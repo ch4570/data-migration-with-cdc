@@ -1,4 +1,4 @@
-package com.example.demo.utils
+package com.example.demo.utils.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext

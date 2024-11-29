@@ -2,6 +2,7 @@ package com.example.demo.entity.mongo
 
 import com.example.demo.entity.EventStatus
 import com.example.demo.entity.OperationType
+import com.example.demo.event.dto.Attachment
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
@@ -17,5 +18,5 @@ data class MessageEvent(
     val eventStatus: EventStatus,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val attachments: List<FileEvent>
+    val attachments: List<Attachment>
 )

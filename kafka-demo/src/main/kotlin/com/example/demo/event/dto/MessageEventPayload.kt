@@ -12,18 +12,14 @@ data class MessageEventPayload(
     val roomId: LongTypeWrapper,
     val operationType: OperationType,
     val eventStatus: EventStatus,
-    val createdAt: LocalDateTimeWrapper,
-    val updatedAt: LocalDateTimeWrapper,
-    val attachments: List<Attachment>,
+    val attachments: List<InnerAttachment>,
 ) {
     fun hasFiles() = attachments.isNotEmpty()
 }
 
-class Attachment(
+class InnerAttachment(
     val fileId: String,
     val fileName: String,
     val extension: String,
     val operationType: OperationType,
-    val createdAt: LocalDateTimeWrapper,
-    val updatedAt: LocalDateTimeWrapper,
 )

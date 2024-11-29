@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional
@@ -36,8 +37,8 @@ class RegisterTextMessageService(
                 senderId = textMessage.senderId.value,
                 content = textMessage.content,
                 roomId = textMessage.roomId.value,
-                createdAt = textMessage.createdAt.value,
-                updatedAt = textMessage.updatedAt.value,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now(),
             )
 
             textMessageElasticRepository.save(textMessageElastic)

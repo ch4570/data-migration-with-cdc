@@ -10,6 +10,4 @@ data class SingleFileEventPayload(
     val fileName: String,
     val extension: String,
     val operationType: OperationType,
-    val createdAt: LocalDateTimeWrapper,
-    val updatedAt: LocalDateTimeWrapper,
 )

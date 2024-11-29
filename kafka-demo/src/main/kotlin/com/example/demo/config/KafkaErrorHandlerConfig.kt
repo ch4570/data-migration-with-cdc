@@ -1,6 +1,7 @@
 package com.example.demo.config
 
 import com.example.demo.event.dto.MessageEventPayload
+import com.example.demo.event.dto.MessageOutboxPayload
 import com.example.demo.event.dto.SingleFileEventPayload
 import com.example.demo.event.dto.TextMessageEventPayload
 import org.springframework.context.annotation.Bean
@@ -12,6 +13,21 @@ import org.springframework.util.backoff.FixedBackOff
 
 @Configuration(proxyBeanMethods = false)
 class KafkaErrorHandlerConfig {
+
+    @Bean(name = ["message-outbox-errorhandler"])
+    fun messageOutboxErrorHandler(kafkaTemplate : KafkaTemplate<String, MessageOutboxPayload>) : DefaultErrorHandler {
+        val recover = ConsumerRecordRecoverer { record, exception ->
+            kafkaTemplate.send(
+                "message-outbox.DLT",
+                record.key() as String,
+                record.value() as MessageOutboxPayload,
+            )
+
+            exception.printStackTrace()
+        }
+
+        return DefaultErrorHandler(recover, FixedBackOff(5000L, 4))
+    }
 
     @Bean(name = ["message-event-errorhandler"])
     fun messageEventErrorHandler(kafkaTemplate : KafkaTemplate<String, MessageEventPayload>) : DefaultErrorHandler {
