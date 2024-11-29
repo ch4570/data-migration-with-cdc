@@ -1,9 +1,8 @@
 package com.example.demo.service
 
 import com.example.demo.dto.RegisterMessageResponse
-import com.example.demo.entity.EventStatus
-import com.example.demo.entity.FileEvent
-import com.example.demo.entity.MessageEvent
+import com.example.demo.entity.Attachment
+import com.example.demo.entity.MessageOutbox
 import com.example.demo.entity.OperationType
 import com.example.demo.repository.MessageEventRepository
 import com.example.demo.service.request.RegisterMessageServiceRequest
@@ -25,27 +24,24 @@ class RegisterMessageService(
     override fun registerMessage(request: RegisterMessageServiceRequest) : Mono<RegisterMessageResponse> {
         return try {
             val attachments = request.files.map {
-                FileEvent(
+                Attachment(
                     fileId = it.fileId,
                     fileName = it.fileName,
                     extension = it.extension,
                     operationType = OperationType.CREATE,
-                    createdAt = LocalDateTime.now(),
-                    updatedAt = LocalDateTime.now()
                 )
             }
-            val messageEvent = MessageEvent(
+            val messageOutbox = MessageOutbox(
                 senderId = request.senderId,
                 content = request.content,
                 roomId = request.roomId,
                 operationType = OperationType.CREATE,
-                eventStatus = EventStatus.CREATED,
                 createdAt = LocalDateTime.now(),
                 updatedAt = LocalDateTime.now(),
                 attachments = attachments
             )
 
-            messageEventRepository.save(messageEvent)
+            messageEventRepository.save(messageOutbox)
                 .map { RegisterMessageResponse(it.id!!) }
 
         } catch (e: Exception) {
