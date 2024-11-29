@@ -10,6 +10,7 @@ import com.example.demo.repository.mongo.MessageEventRepository
 import com.example.demo.repository.mongo.TextMessageEventRepository
 import com.example.demo.service.usecase.RegisterMessageEventUseCase
 import com.example.demo.utils.markIsComplete
+import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,6 +23,8 @@ class RegisterMessageEventService(
     private val messageEventRepository: MessageEventRepository,
     private val textMessageEventRepository: TextMessageEventRepository,
 ) : RegisterMessageEventUseCase {
+
+    private val logger = LoggerFactory.getLogger(RegisterMessageEventService::class.java)
 
     override fun registerMessageEvent(messageEvent: MessageEventPayload) {
         if (messageEventRepository.existsByIdAndEventStatus(messageEvent.id.value, EventStatus.COMPLETE)) {
@@ -56,7 +59,7 @@ class RegisterMessageEventService(
                 fileEventRepository.saveAll(attachments)
             }
         } catch (e: Exception) {
-            // rollback
+            logger.error("Error : [${e.message}], eventDetail = [$messageEvent]")
             throw e
         }
     }

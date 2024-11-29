@@ -8,6 +8,7 @@ import com.example.demo.utils.SingleFileEventPayloadDeserializer
 import com.example.demo.utils.TextMessageEventPayloadDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
@@ -15,6 +16,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 
@@ -27,10 +29,53 @@ class KafkaConsumerConfig(
     private val singleFileEventPayloadDeserializer: SingleFileEventPayloadDeserializer,
 ) {
 
+    @Bean(name = ["message-event-dlt-consumer"])
+    fun messageEventDLTConsumer() : ConcurrentKafkaListenerContainerFactory<String, MessageEventPayload> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, MessageEventPayload>()
+        factory.consumerFactory = messageEventDLTConsumerFactory()
+
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+        return factory
+    }
+
+    private fun messageEventDLTConsumerFactory() : ConsumerFactory<String, MessageEventPayload> {
+        return DefaultKafkaConsumerFactory(createConsumerConfigs(), StringDeserializer(), ErrorHandlingDeserializer(JsonDeserializer()))
+    }
+
+    @Bean(name = ["text-message-event-dlt-consumer"])
+    fun textMessageEventDLTConsumer() : ConcurrentKafkaListenerContainerFactory<String, TextMessageEventPayload> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, TextMessageEventPayload>()
+        factory.consumerFactory = textMessageEventDLTConsumerFactory()
+
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+        return factory
+    }
+
+    private fun textMessageEventDLTConsumerFactory() : ConsumerFactory<String, TextMessageEventPayload> {
+        return DefaultKafkaConsumerFactory(createConsumerConfigs(), StringDeserializer(), ErrorHandlingDeserializer(JsonDeserializer()))
+    }
+
+    @Bean(name = ["single-file-event-dlt-consumer"])
+    fun singleFileEventDLTConsumer() : ConcurrentKafkaListenerContainerFactory<String, SingleFileEventPayload> {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, SingleFileEventPayload>()
+        factory.consumerFactory = singleFileEventDLTConsumerFactory()
+
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+        return factory
+    }
+
+    private fun singleFileEventDLTConsumerFactory() : ConsumerFactory<String, SingleFileEventPayload> {
+        return DefaultKafkaConsumerFactory(createConsumerConfigs(), StringDeserializer(), ErrorHandlingDeserializer(JsonDeserializer()))
+    }
+
     @Bean(name = ["message-event-consumer"])
-    fun messageEventConsumer() : ConcurrentKafkaListenerContainerFactory<String, MessageEventPayload> {
+    fun messageEventConsumer(
+        @Qualifier("message-event-errorhandler")
+        handler: DefaultErrorHandler,
+    ) : ConcurrentKafkaListenerContainerFactory<String, MessageEventPayload> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, MessageEventPayload>()
         factory.consumerFactory = messageEventConsumerFactory()
+        factory.setCommonErrorHandler(handler)
         // Auto-Commit을 적용하지 않고 수동 커밋 활성화
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         return factory
@@ -44,9 +89,13 @@ class KafkaConsumerConfig(
     }
 
     @Bean(name = ["text-message-event-consumer"])
-    fun textMessageEventConsumer() : ConcurrentKafkaListenerContainerFactory<String, TextMessageEventPayload> {
+    fun textMessageEventConsumer(
+        @Qualifier("text-message-event-errorhandler")
+        handler: DefaultErrorHandler,
+    ) : ConcurrentKafkaListenerContainerFactory<String, TextMessageEventPayload> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, TextMessageEventPayload>()
         factory.consumerFactory = textMessageEventConsumerFactory()
+        factory.setCommonErrorHandler(handler)
         // Auto-Commit을 적용하지 않고 수동 커밋 활성화
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         return factory
@@ -60,9 +109,13 @@ class KafkaConsumerConfig(
     }
 
     @Bean(name = ["single-file-event-consumer"])
-    fun singleFileEventConsumer() : ConcurrentKafkaListenerContainerFactory<String, SingleFileEventPayload> {
+    fun singleFileEventConsumer(
+        @Qualifier("single-file-event-errorhandler")
+        handler: DefaultErrorHandler,
+    ) : ConcurrentKafkaListenerContainerFactory<String, SingleFileEventPayload> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, SingleFileEventPayload>()
         factory.consumerFactory = singleFileEventConsumerFactory()
+        factory.setCommonErrorHandler(handler)
         // Auto-Commit을 적용하지 않고 수동 커밋 활성화
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         return factory
@@ -81,7 +134,7 @@ class KafkaConsumerConfig(
         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class::java,
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
-        ConsumerConfig.GROUP_ID_CONFIG to "group1",
+        ConsumerConfig.GROUP_ID_CONFIG to "consumer-group",
         JsonDeserializer.TRUSTED_PACKAGES to "*",
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",

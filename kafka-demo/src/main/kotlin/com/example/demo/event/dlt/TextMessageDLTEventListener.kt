@@ -1,4 +1,4 @@
-package com.example.demo.event
+package com.example.demo.event.dlt
 
 import com.example.demo.event.dto.TextMessageEventPayload
 import com.example.demo.service.usecase.RegisterTextMessageUseCase
@@ -12,14 +12,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
-class TextMessageEventListener(
+class TextMessageDLTEventListener(
     private val registerTextMessageUseCase: RegisterTextMessageUseCase,
 ) {
 
-    private val logger = LoggerFactory.getLogger(TextMessageEventListener::class.java)
+    private val logger = LoggerFactory.getLogger(TextMessageDLTEventListener::class.java)
 
     @Async
-    @KafkaListener(topics = ["text-message-event"], groupId = "consumer-group", containerFactory = "text-message-event-consumer")
+    @KafkaListener(topics = ["text-message-event.DLT"], groupId = "consumer-group", containerFactory = "text-message-event-dlt-consumer")
     fun handleEvent(record: ConsumerRecord<String, TextMessageEventPayload>, acknowledgment: Acknowledgment) {
         logger.info("이벤트 수신 완료 = [${record.value()}], 수신 시각 = [${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}]")
         registerTextMessageUseCase.registerTextMessage(record.value())

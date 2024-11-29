@@ -8,6 +8,7 @@ import com.example.demo.repository.elastic.SingleFileElasticRepository
 import com.example.demo.repository.mongo.FileEventRepository
 import com.example.demo.service.usecase.RegisterFileEventUseCase
 import com.example.demo.utils.markIsComplete
+import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,6 +20,8 @@ class RegisterFileEventService(
     private val fileEventRepository: FileEventRepository,
     private val fileElasticRepository: SingleFileElasticRepository,
 ) : RegisterFileEventUseCase {
+
+    private val logger = LoggerFactory.getLogger(RegisterFileEventService::class.java)
 
     override fun registerFileEvent(payload: SingleFileEventPayload) {
         if (fileEventRepository.existsByIdAndEventStatus(payload.id.value, EventStatus.COMPLETE)) {
@@ -39,7 +42,7 @@ class RegisterFileEventService(
             fileElasticRepository.save(fileElastic)
 
         } catch (e: Exception) {
-            // rollback
+            logger.error("Error : [${e.message}], eventDetail = [$payload]")
             throw e
         }
     }

@@ -1,4 +1,4 @@
-package com.example.demo.event
+package com.example.demo.event.dlt
 
 import com.example.demo.event.dto.SingleFileEventPayload
 import com.example.demo.service.usecase.RegisterFileEventUseCase
@@ -12,17 +12,16 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
-class SingleFileEventListener(
+class SingleFileDLTEventListener(
     private val registerFileEventUseCase: RegisterFileEventUseCase,
 ) {
 
-    private val logger = LoggerFactory.getLogger(SingleFileEventListener::class.java)
+    private val logger = LoggerFactory.getLogger(SingleFileDLTEventListener::class.java)
 
     @Async
-    @KafkaListener(topics = ["file-event"], groupId = "consumer-group", containerFactory = "single-file-event-consumer")
+    @KafkaListener(topics = ["file-event.DLT"], groupId = "consumer-group", containerFactory = "single-file-event-dlt-consumer")
     fun handleEvent(record: ConsumerRecord<String, SingleFileEventPayload>, acknowledgment: Acknowledgment) {
         logger.info("이벤트 수신 완료 = [${record.value()}], 수신 시각 = [${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}]")
-        throw Exception()
         registerFileEventUseCase.registerFileEvent(record.value())
         acknowledgment.acknowledge()
     }

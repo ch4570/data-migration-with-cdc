@@ -12,7 +12,6 @@ data class TextMessageEventPayload(
     val content: String,
     val roomId: LongTypeWrapper,
     val operationType: OperationType,
-    val eventStatus: EventStatus,
     val createdAt: LocalDateTimeWrapper,
     val updatedAt: LocalDateTimeWrapper,
 )
