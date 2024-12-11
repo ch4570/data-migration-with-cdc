@@ -10,3 +10,12 @@ enum class OperationType {
     UPDATE,
     DELETE
 }
+
+enum class ContentType {
+    TEXT,
+    COMMENT,
+    TODO,
+    POLL,
+    CONNECT,
+    FILE
+}

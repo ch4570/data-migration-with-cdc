@@ -1,7 +1,21 @@
 version: '3.9'
 services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    networks:
+      - cdc_default
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+
   zookeeper:
-    image: quay.io/debezium/zookeeper:3.0
+    image: wurstmeister/zookeeper
     container_name: zookeeper
     ports:
       - "2181:2181"
@@ -11,14 +25,14 @@ services:
       - cdc_default
 
   kafka:
-    image: quay.io/debezium/kafka:3.0
+    image: wurstmeister/kafka
     container_name: kafka
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
     environment:
-      - ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_DOCKER://kafka:29092
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_DOCKER://0.0.0.0:29092
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_DOCKER:PLAINTEXT
@@ -27,7 +41,7 @@ services:
       - cdc_default
 
   connect:
-    image: quay.io/debezium/connect:3.0
+    image: debezium/connect:1.6
     container_name: connect
     depends_on:
       - kafka

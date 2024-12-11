@@ -47,9 +47,5 @@ class RegisterTextMessageService(
             logger.error("Error : [${e.message}], eventDetail = [$textMessage]")
             throw e
         }
-
-
     }
-
-
 }
