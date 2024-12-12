@@ -13,9 +13,9 @@ data class MessageOutboxPayload(
     val attachments: List<Attachment>,
 )
 
-data class Attachment(
-    val fileId: String,
-    val fileName: String,
-    val extension: String,
-    val operationType: OperationType,
-)
+//data class Attachment(
+//    val fileId: String,
+//    val fileName: String,
+//    val extension: String,
+//    val operationType: OperationType,
+//)

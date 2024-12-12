@@ -6,5 +6,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface FileEventRepository : MongoRepository<FileEvent, String> {
 
-    fun existsByIdAndEventStatus(fileId: String, eventStatus: EventStatus) : Boolean
 }

@@ -1,6 +1,7 @@
 package com.example.demo.event.dlt
 
 import com.example.demo.entity.ContentType
+import com.example.demo.event.dto.Attachment
 import com.example.demo.event.dto.TextMessageEventPayload
 import com.example.demo.service.usecase.RegisterTextMessageUseCase
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -35,19 +36,43 @@ class TextMessageDLTEventListener(
     fun handleEvent(records: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         logger.info("이벤트 수신 완료 = [${records.value()}]")
         val node = objectMapper.readTree(records.value())
-            .get("payload").get("after").textValue()
+            .get("payload").textValue()
 
         val value = objectMapper.readTree(node)
         val contentType = ContentType.valueOf(value.get("contentType").textValue().uppercase())
+        val attachments = objectMapper.convertValue(value.get("attachments"), Array<Attachment>::class.java)
+
+        logger.info("attachments = ${attachments.isEmpty()}")
+        attachments.forEach {
+            logger.info("attachments = [$it]")
+        }
 
         when (contentType) {
             ContentType.TEXT -> {
 
             }
 
-            ContentType.FILE -> {
+            ContentType.COMMENT -> {
 
             }
+
+            ContentType.TODO -> {
+
+            }
+
+            ContentType.POLL -> {
+
+            }
+
+            ContentType.CONNECT -> {
+
+            }
+
+            ContentType.POST -> {
+
+            }
+
+
 
             else -> {
 

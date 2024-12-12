@@ -17,5 +17,5 @@ enum class ContentType {
     TODO,
     POLL,
     CONNECT,
-    FILE
+    POST,
 }
