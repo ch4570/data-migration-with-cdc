@@ -3,6 +3,7 @@ package com.example.demo.event.dlt
 import com.example.demo.entity.ContentType
 import com.example.demo.event.dto.Attachment
 import com.example.demo.event.dto.TextMessageEventPayload
+import com.example.demo.service.usecase.MessageEventPreProcessor
 import com.example.demo.service.usecase.RegisterTextMessageUseCase
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -19,6 +20,7 @@ import java.time.format.DateTimeFormatter
 class TextMessageDLTEventListener(
     private val registerTextMessageUseCase: RegisterTextMessageUseCase,
     private val objectMapper: ObjectMapper,
+    private val messageEventPreProcessor: MessageEventPreProcessor,
 ) {
 
     private val logger = LoggerFactory.getLogger(TextMessageDLTEventListener::class.java)
@@ -34,53 +36,7 @@ class TextMessageDLTEventListener(
     @Async
     @KafkaListener(topics = ["message-outbox-toss"], groupId = "consumer-group", containerFactory = "message-outbox-toss-consumer")
     fun handleEvent(records: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        logger.info("이벤트 수신 완료 = [${records.value()}]")
-        val node = objectMapper.readTree(records.value())
-            .get("payload").textValue()
-
-        val value = objectMapper.readTree(node)
-        val contentType = ContentType.valueOf(value.get("contentType").textValue().uppercase())
-        val attachments = objectMapper.convertValue(value.get("attachments"), Array<Attachment>::class.java)
-
-        logger.info("attachments = ${attachments.isEmpty()}")
-        attachments.forEach {
-            logger.info("attachments = [$it]")
-        }
-
-        when (contentType) {
-            ContentType.TEXT -> {
-
-            }
-
-            ContentType.COMMENT -> {
-
-            }
-
-            ContentType.TODO -> {
-
-            }
-
-            ContentType.POLL -> {
-
-            }
-
-            ContentType.CONNECT -> {
-
-            }
-
-            ContentType.POST -> {
-
-            }
-
-
-
-            else -> {
-
-            }
-        }
-
-
-        logger.info("contentType = [${value.get("contentType").textValue()}]")
+        messageEventPreProcessor.preProcess(records.value())
         acknowledgment.acknowledge()
     }
 }
