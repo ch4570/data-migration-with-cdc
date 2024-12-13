@@ -55,9 +55,6 @@ class MessageEventPreProcessorImpl(
     }
 
     private fun transformToSimpleMessage(messageMap: MutableMap<String, Any?>) {
-        // attachments 삭제
-        messageMap.remove("attachments")
-
         // _id 추출
         val objectId = (messageMap["_id"] as Map<String, String>)["\$oid"]!!
 
