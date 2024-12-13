@@ -9,7 +9,6 @@ import com.example.demo.service.usecase.MessageEventPreProcessor
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
-import org.springframework.data.elasticsearch.core.document.Document
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -51,7 +50,7 @@ class MessageEventPreProcessorImpl(
         }
 
         transformToSimpleMessage(mapValue)
-        mongoTemplate.insert(Document.parse(objectMapper.writeValueAsString(mapValue)), "test-index")
+        mongoTemplate.save(mapValue, "message-event")
         logger.info("메시지 처리 완료, 최종 메시지 = [$mapValue]")
     }
 
