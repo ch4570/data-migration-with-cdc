@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(rollbackFor = [Exception::class])
+@Transactional
 class RegisterMessageSearchDataService(
     private val mongoTemplate: MongoTemplate,
     private val objectMapper: ObjectMapper,
@@ -23,9 +23,13 @@ class RegisterMessageSearchDataService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun saveMessageData(document: Document) {
-        val document = normalizeDocument(document)
-        logger.info("Generated Normalized Document = [$document]")
-        mongoTemplate.markIsComplete(document["_id"] as ObjectId, "message-event")
+        try {
+            val document = normalizeDocument(document)
+            logger.info("Generated Normalized Document = [$document]")
+            mongoTemplate.markIsComplete(document["_id"] as ObjectId, "message-event")
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
     }
 
     private fun normalizeDocument(document: Document): Map<String, Any?> {
