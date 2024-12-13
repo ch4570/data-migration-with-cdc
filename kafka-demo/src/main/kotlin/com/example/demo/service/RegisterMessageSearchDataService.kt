@@ -6,23 +6,29 @@ import com.example.demo.utils.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bson.Document
 import org.bson.types.ObjectId
+import org.elasticsearch.client.RestClient
+import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
-@Suppress("UNCHECKED_CAST")
+@Transactional(rollbackFor = [Exception::class])
 class RegisterMessageSearchDataService(
     private val mongoTemplate: MongoTemplate,
     private val objectMapper: ObjectMapper,
+    private val elasticClient: RestClient
 ) : RegisterMessageSearchDataUseCase {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     override fun saveMessageData(document: Document) {
-        normalizeDocument(document)
+        val document = normalizeDocument(document)
+        logger.info("Generated Normalized Document = [$document]")
         mongoTemplate.markIsComplete(document["_id"] as ObjectId, "message-event")
     }
 
-    private fun normalizeDocument(document: Document): Document {
+    private fun normalizeDocument(document: Document): Map<String, Any?> {
         val contentType = ContentType.valueOf(document.getString("contentType"))
         val todo = document.getNestedObjectMap("content.todo")
 
@@ -42,11 +48,7 @@ class RegisterMessageSearchDataService(
         val attachmentIds = extractAttachmentIds(document)
         val attachmentNames = extractAttachmentNames(document)
 
-        val normalizeDocument =
-            createNormalizeDocument(document, contentType, contents, mentions, title, body, attachmentIds, attachmentNames)
-
-        println("normalizeDocument = $normalizeDocument")
-        return document
+        return createNormalizeDocument(document, contentType, contents, mentions, title, body, attachmentIds, attachmentNames)
     }
 
     private fun createNormalizeDocument(
@@ -60,6 +62,7 @@ class RegisterMessageSearchDataService(
         attachmentNames: List<String>
     ): MutableMap<String, Any?> {
         val normalizeDocument = mutableMapOf(
+            "_id" to document.get("_id", ObjectId::class.java),
             "id" to document.getNullableLongValue("id"),
             "permission" to document.getNullableIntValue("permission"),
             "teamId" to document.getNullableLongValue("teamId"),
@@ -95,7 +98,6 @@ class RegisterMessageSearchDataService(
         when (contentType) {
             ContentType.TODO -> {
                 val todo = document.getNestedObjectMap("content.todo")
-                println("todo = [$todo]")
                 normalizeDocument["todoId"] = todo.getLongValue("todoId")
                 normalizeDocument["todoRoomId"] = todo.getLongValue("roomId")
                 normalizeDocument["todoStatus"] = todo.getStringValue("status")
@@ -121,12 +123,12 @@ class RegisterMessageSearchDataService(
         }
 
         if (attachmentNames.isNotEmpty()) {
-            var contentsPr = document.getStringValue("contents_pr")!!
+            var contentsPr = normalizeDocument.getStringValue("contents_pr")!!
             attachmentNames.forEach {
                 contentsPr += " $it"
             }
 
-            document["contents_pr"] = contentsPr
+            normalizeDocument["contents_pr"] = contentsPr
         }
 
         return normalizeDocument
@@ -142,12 +144,12 @@ class RegisterMessageSearchDataService(
 
     private fun extractMentions(document: Document) = objectMapper.writeValueAsString(document["mentions"])
     private fun extractAttachmentIds(document: Document) : List<Long> {
-        val attachments = document["attachments"] as List<Map<String, Any?>>
-        return attachments.map { it["id"] as Long }
+        val attachments = document.getGenericCollection<Map<String, Any?>>("attachments")
+        return attachments.map { it.getLongValue("id")!! }
     }
     private fun extractAttachmentNames(document: Document) : List<String> {
-        val attachments = document["attachments"] as List<Map<String, Any?>>
-        return attachments.map { (it["content"] as Map<String, Any?>)["title"] as String }
+        val attachments = document.getGenericCollection<Map<String, Any?>>("attachments")
+        return attachments.map { it.getNestedStringValue("content.title")!! }
     }
 
     private fun extractTitle(contentType: ContentType, document: Document) : String {
