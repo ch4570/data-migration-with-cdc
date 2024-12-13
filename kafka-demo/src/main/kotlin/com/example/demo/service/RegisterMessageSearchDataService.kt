@@ -9,8 +9,6 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.ZoneId
-import java.util.Date
 
 @Service
 @Transactional
@@ -26,8 +24,7 @@ class RegisterMessageSearchDataService(
 
     private fun normalizeDocument(document: Document): Document {
         val contentType = ContentType.valueOf(document.getString("contentType"))
-        val content = document.getObjectMap("content")
-        val todo = document.getObjectMap("todo")
+        val todo = document.getNestedObjectMap("content.todo")
 
         // TODO가 없으면 색인이 불가능
         if (contentType == ContentType.TODO && todo.isEmpty()) throw RuntimeException("Content Type = TODO, But it hasn't data")
@@ -45,13 +42,30 @@ class RegisterMessageSearchDataService(
         val attachmentIds = extractAttachmentIds(document)
         val attachmentNames = extractAttachmentNames(document)
 
+        val normalizeDocument =
+            createNormalizeDocument(document, contentType, contents, mentions, title, body, attachmentIds, attachmentNames)
+
+        println("normalizeDocument = $normalizeDocument")
+        return document
+    }
+
+    private fun createNormalizeDocument(
+        document: Document,
+        contentType: ContentType,
+        contents: String,
+        mentions: String?,
+        title: String,
+        body: String,
+        attachmentIds: List<Long>,
+        attachmentNames: List<String>
+    ): MutableMap<String, Any?> {
         val normalizeDocument = mutableMapOf(
             "id" to document.getNullableLongValue("id"),
             "permission" to document.getNullableIntValue("permission"),
             "teamId" to document.getNullableLongValue("teamId"),
             "writerId" to document.getNullableLongValue("writerId"),
             "feedbackId" to document.getNullableLongValue("feedbackId"),
-            "shareEntities" to document["shareEntities"] as List<Long>,
+            "shareEntities" to document.getGenericCollection<Long>("shareEntities"),
             "contentType" to contentType,
             "contents" to contents,
             "contents_pr" to contents,
@@ -60,9 +74,9 @@ class RegisterMessageSearchDataService(
             "createdAt" to document.getLocalDateTimeValue("createdAt"),
             "updatedAt" to document.getLocalDateTimeValue("updatedAt"),
             "from" to document.getString("from"),
-            "isThreaded" to document["isThreaded"] as Boolean,
-            "isFormatted" to document["isFormatted"] as Boolean,
-            "connectType" to content["connectType"] as String?,
+            "isThreaded" to document.getBoolean("isThreaded"),
+            "isFormatted" to document.getBoolean("isFormatted"),
+            "connectType" to document.getNestedNullableStringValue("content.connectType"),
             "title" to title,
             "body" to body,
             "text" to body.let { it.ifBlank { "(empty)" } },
@@ -78,8 +92,52 @@ class RegisterMessageSearchDataService(
             "isPublic" to false,
         )
 
-        println("normalizedocument = $normalizeDocument")
-        return document
+        when (contentType) {
+            ContentType.TODO -> {
+                val todo = document.getNestedObjectMap("content.todo")
+                println("todo = [$todo]")
+                normalizeDocument["todoId"] = todo.getLongValue("todoId")
+                normalizeDocument["todoRoomId"] = todo.getLongValue("roomId")
+                normalizeDocument["todoStatus"] = todo.getStringValue("status")
+                normalizeDocument["todoCreatorId"] = todo.getLongValue("creatorId")
+                normalizeDocument["todoAssigneeIds"] = todo.getGenericList<Long>("assigneeIds")
+                normalizeDocument["todoCompleterIds"] = todo.getGenericList<Long>("completerIds")
+                normalizeDocument["todoSearchIds"] = extractTodoSearchIds(todo)
+                normalizeDocument["todoProgress"] = todo.getLongValue("progress") ?: 0
+                normalizeDocument["todoCreatedAt"] = todo.getLocalDateTimeUnwrappedValue("createdAt")
+                normalizeDocument["todoUpdatedAt"] = todo.getLocalDateTimeUnwrappedValue("updatedAt")
+                normalizeDocument["todoClosedAt"] = todo.getLocalDateTimeUnwrappedValue("closedAt")
+                normalizeDocument["text"] = "$title\n$body".trim()
+            }
+            ContentType.POST -> {
+                normalizeDocument["text"] = "$title\n$body".trim()
+            }
+
+            ContentType.POLL -> {
+                normalizeDocument["pollItems"] = emptyList<Any>()
+            }
+
+            else -> {}
+        }
+
+        if (attachmentNames.isNotEmpty()) {
+            var contentsPr = document.getStringValue("contents_pr")!!
+            attachmentNames.forEach {
+                contentsPr += " $it"
+            }
+
+            document["contents_pr"] = contentsPr
+        }
+
+        return normalizeDocument
+    }
+
+    private fun extractTodoSearchIds(todo: Map<String, Any?>) : List<Long> {
+        val assigneeIds = todo.getGenericList<Long>("assigneeIds")
+        val creatorId = todo.getLongValue("creatorId")
+
+        assigneeIds.add(creatorId!!)
+        return assigneeIds.distinct()
     }
 
     private fun extractMentions(document: Document) = objectMapper.writeValueAsString(document["mentions"])
@@ -93,22 +151,18 @@ class RegisterMessageSearchDataService(
     }
 
     private fun extractTitle(contentType: ContentType, document: Document) : String {
-        println("content = [${(document["content"] as Map<String, Any?>)}]")
         return if (contentType == ContentType.TODO) {
-            val todo = (document["content"] as Map<String, Any?>)["todo"] as Map<String, Any?>
-            todo["title"] as String
+            document.getNestedNullableStringValue("content.todo.title")?.trim() ?: ""
         } else {
-            val title = ((document["content"] as Map<String, Any?>)["title"] as String?)
-            if (title.isNullOrBlank()) "" else title.trim()
+            document.getNestedNullableStringValue("content.title")?.trim() ?: ""
         }
     }
 
     private fun extractBody(contentType: ContentType, document: Document) : String {
         return if (contentType == ContentType.TODO) {
-            val todo = (document["content"] as Map<String, Any?>)["todo"] as Map<String, Any?>
-            todo["description"] as String
+            document.getNestedNullableStringValue("content.todo.description")?.trim() ?: ""
         } else {
-            ((document["content"] as Map<String, Any?>)["body"] as String).trim()
+            document.getNestedNullableStringValue("content.body")?.trim() ?: ""
         }
     }
 }

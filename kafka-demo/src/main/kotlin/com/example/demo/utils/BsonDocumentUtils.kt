@@ -6,7 +6,7 @@ import java.time.ZoneId
 import java.util.*
 
 @Suppress("UNCHECKED_CAST")
-fun Document.getObjectMap(propertyName: String) : Map<String, Any?> = get(propertyName) as Map<String, Any?>
+fun Document.getObjectMap(propertyName: String) : Map<String, Any?> = get(propertyName) as? Map<String, Any?> ?: mapOf()
 
 fun Document.getNestedObjectMap(nestedPropertyName: String) : Map<String, Any?> {
     val nameTokens = nestedPropertyName.split(".")
@@ -14,7 +14,7 @@ fun Document.getNestedObjectMap(nestedPropertyName: String) : Map<String, Any?> 
 
     @Suppress("UNCHECKED_CAST")
     nameTokens.forEach {
-        result = if (result.isEmpty()) getObjectMap(it) else result[it] as Map<String, Any?>
+        result = if (result.isEmpty()) getObjectMap(it) else result[it] as? Map<String, Any?> ?: mapOf()
     }
 
     return result
@@ -30,7 +30,7 @@ fun <T> Document.getNestedGenericCollection(nestedPropertyName: String) : Collec
     val nameTokens = nestedPropertyName.split(".")
     var objectMap: Map<String, Any?> = mapOf()
 
-    nameTokens.subList(0, nameTokens.size)
+    nameTokens.subList(0, nameTokens.size - 1)
         .forEach {
             objectMap = if (objectMap.isEmpty()) getObjectMap(it) else objectMap[it] as Map<String, Any?>
         }
@@ -46,7 +46,7 @@ fun Document.getNullableNestedIntValue(nestedPropertyName: String) : Int? {
     val nameTokens = nestedPropertyName.split(".")
     var objectMap: Map<String, Any?> = mapOf()
 
-    nameTokens.subList(0, nameTokens.size)
+    nameTokens.subList(0, nameTokens.size - 1)
         .forEach {
             @Suppress("UNCHECKED_CAST")
             objectMap = if (objectMap.isEmpty()) getObjectMap(it) else objectMap[it] as Map<String, Any?>
@@ -65,5 +65,18 @@ fun Document.getLocalDateTimeValue(propertyName: String) : LocalDateTime {
 }
 
 fun Document.getDateValue(propertyName: String) = get(propertyName) as Date
+
+fun Document.getNestedNullableStringValue(nestedPropertyName: String) : String? {
+    val nameTokens = nestedPropertyName.split(".")
+    var objectMap: Map<String, Any?> = mapOf()
+
+    nameTokens.subList(0, nameTokens.size - 1)
+        .forEach {
+            @Suppress("UNCHECKED_CAST")
+            objectMap = if (objectMap.isEmpty()) getObjectMap(it) else objectMap[it] as Map<String, Any?>
+        }
+
+    return objectMap[nameTokens.last()] as? String
+}
 
 
